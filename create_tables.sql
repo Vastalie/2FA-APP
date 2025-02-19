@@ -1,6 +1,6 @@
 CREATE DATABASE twofa;
 
-USE twofa;
+USE twofa:
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
