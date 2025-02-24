@@ -42,10 +42,9 @@ db.connect((err) => {
     console.log('Connected to MySQL database.');
 });
 
-// Function to generate QR Code
+// Function to generate QR Code file (not always necessary if you use data URLs)
 function generateQRCode(otpauth, callback) {
     const qrFilePath = path.join(__dirname, 'public', `qr_${Date.now()}.png`);
-
     qrcode.toFile(qrFilePath, otpauth, (err) => {
         if (err) {
             console.error('Error generating QR Code:', err);
@@ -56,27 +55,30 @@ function generateQRCode(otpauth, callback) {
     });
 }
 
+// Register success
 app.get('/register-success', (req, res) => {
     res.render('register-success');
 });
 
+// Default route
 app.get('/', (req, res) => {
     res.redirect('/register');
 });
 
+// Register page
 app.get('/register', (req, res) => {
     res.render('register');
 });
 
 // Handle registration
-app.post('/register', async (req, res) => {
+app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
 
     if (username.length < 8 || password.length < 8) {
         return res.send('Error: Username and password must be at least 8 characters long.');
     }
 
-    db.query('SELECT email FROM users WHERE email = ?', [email], async (err, results) => {
+    db.query('SELECT email FROM users WHERE email = ?', [email], (err, results) => {
         if (err) {
             console.error(err);
             return res.status(500).send('Database error');
@@ -86,27 +88,45 @@ app.post('/register', async (req, res) => {
             return res.status(400).send('Error: This email is already registered. Try another one.');
         }
 
+        // Hash the password
         bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
-                console.error("bcrypt hashing error:", err);
+                console.error('bcrypt hashing error:', err);
                 return res.status(500).send('Error hashing password');
             }
 
-            db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                [username, email, hashedPassword], (err, result) => {
+            // Insert user
+            db.query(
+                'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                [username, email, hashedPassword],
+                (err, result) => {
                     if (err) {
                         console.error(err);
                         return res.status(500).send('Database error while inserting user.');
                     }
 
-                    res.redirect('/register-success');
+                    // Generate a 2FA secret for this new user
+                    const newSecret = otplib.authenticator.generateSecret();
+
+                    // Save it in the users table
+                    db.query(
+                        'UPDATE users SET secret = ? WHERE id = ?',
+                        [newSecret, result.insertId],
+                        (err) => {
+                            if (err) {
+                                console.error(err);
+                                return res.status(500).send('Database error while updating user secret.');
+                            }
+                            res.redirect('/register-success');
+                        }
+                    );
                 }
             );
         });
     });
 });
 
-// login page
+// Login page
 app.get('/login', (req, res) => {
     res.render('login');
 });
@@ -129,7 +149,6 @@ app.post('/login', (req, res) => {
         }
 
         const user = results[0];
-
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 return res.status(500).send('Server error');
@@ -139,13 +158,14 @@ app.post('/login', (req, res) => {
                 return res.status(401).send('Invalid credentials');
             }
 
-            // Set session username before redirect
+            // Save username in session
             req.session.username = user.username;
             res.redirect('/qr-setup');
         });
     });
 });
 
+// QR setup page
 app.get('/qr-setup', (req, res) => {
     if (!req.session.username) {
         return res.redirect('/login');
@@ -153,6 +173,7 @@ app.get('/qr-setup', (req, res) => {
 
     const username = req.session.username;
 
+    // Retrieve the secret from the database
     db.query('SELECT secret FROM users WHERE username = ?', [username], (err, results) => {
         if (err) {
             console.error('Database error:', err);
@@ -164,8 +185,10 @@ app.get('/qr-setup', (req, res) => {
         }
 
         const secret = results[0].secret;
+        // Create otpauth URL
         const otpauth = otplib.authenticator.keyuri(username, 'SecureNotesApp', secret);
 
+        // Generate QR code as data URL
         qrcode.toDataURL(otpauth, (err, qrCodeUrl) => {
             if (err) {
                 console.error('QR Code generation error:', err);
@@ -177,17 +200,24 @@ app.get('/qr-setup', (req, res) => {
     });
 });
 
-// OTP Validation Route
+// OTP validation route
 app.post('/validate', (req, res) => {
     const { username, otp } = req.body;
 
     db.query('SELECT secret FROM users WHERE username = ?', [username], (err, results) => {
-        if (err) return res.status(500).send('Server error');
-        if (results.length === 0) return res.status(401).send('User not found');
+        if (err) {
+            return res.status(500).send('Server error');
+        }
+        if (results.length === 0) {
+            return res.status(401).send('User not found');
+        }
 
         const secret = results[0].secret;
-        if (!secret) return res.status(401).send('No OTP secret found. Generate one first.');
+        if (!secret) {
+            return res.status(401).send('No OTP secret found. Generate one first.');
+        }
 
+        // Check OTP
         const isValid = otplib.authenticator.check(otp, secret);
         if (isValid) {
             res.send('<h1>2FA Authentication Successful</h1>');
@@ -197,6 +227,7 @@ app.post('/validate', (req, res) => {
     });
 });
 
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
