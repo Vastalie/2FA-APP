@@ -8,6 +8,10 @@ const path = require('path');
 const app = express();
 const PORT = 8000;
 
+// Set up EJS as the template engine
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views'); // Specify the views directory
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
