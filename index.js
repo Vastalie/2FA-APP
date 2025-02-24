@@ -121,45 +121,34 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
-        if (err) return res.status(500).send('Database error');
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
         if (results.length === 0) {
-            return res.status(401).send('Invalid credentials');
+            return res.status(401).send('Invalid credentials'); // If no user found
         }
 
         const user = results[0];
 
-        // Compare the hashed password using bcrypt
+        // Check if password is hashed in database
+        console.log('Stored Hashed Password:', user.password);
+        console.log('Entered Plain Password:', password);
+
+        // Compare the hashed password with the entered password
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
-            return res.status(401).send('Incorrect password. Try again.');
+            console.log('Password does not match');
+            return res.status(401).send('Invalid credentials');
         }
 
-        // Generate a new TOTP secret for every login
-        const newSecret = otplib.authenticator.generateSecret();
-        req.session.otpSecret = newSecret; // store secret in session
-
-        // Generate a unique otpauth URL
-        const otpauth = otplib.authenticator.keyuri(username, 'My2FAApp', newSecret);
-
-        // Generate a QR code for the new secret
-        generateQRCode(otpauth, (err, qrPath) => {
-            if (err) {
-                return res.status(500).send('Failed to generate QR Code');
-            }
-
-            res.send(`
-                <h1>Scan QR Code with Google Authenticator</h1>
-                <img src="/${path.basename(qrPath)}" alt="QR Code"><br>
-                <form action="/validate" method="POST">
-                    <input type="hidden" name="username" value="${username}">
-                    <label>Enter OTP:</label>
-                    <input type="text" name="otp" required><br>
-                    <button type="submit">Validate</button>
-                </form>
-            `);
-        });
+        console.log('Login successful');
+        res.redirect('/dashboard'); // Redirect user to a dashboard or home page after login
     });
 });
+
 
 // OTP Validation Route
 app.post('/validate', (req, res) => {
