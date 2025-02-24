@@ -95,60 +95,80 @@ app.post('/register', async (req, res) => {
             return res.status(400).send('Error: This email is already registered. Try another one.');
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Hash the password before inserting
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error("bcrypt hashing error:", err);
+                return res.status(500).send('Error hashing password');
+            }
 
-        // Insert new user into database
-        db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-            [username, email, hashedPassword], (err, result) => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).send('Database error while inserting user.');
-                }
+            db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                [username, email, hashedPassword], (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).send('Database error while inserting user.');
+                    }
 
-                res.redirect('/register-success'); // Redirect to success page
-            });
+                    res.redirect('/register-success'); // Redirect to success page
+                });
+        });
     });
 });
+
 
 // login page
 app.get('/login', (req, res) => {
     res.render('login'); 
 });
 
+
 // Handle login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Database error');
-        }
+    try {
+        // Query the database using a Promise-based approach
+        db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).send('Database error');
+            }
 
-        if (results.length === 0) {
-            return res.status(401).send('Invalid credentials'); // If no user found
-        }
+            // Debug: Print database results
+            console.log("DB Query Results:", results);
 
-        const user = results[0];
+            if (results.length === 0) {
+                console.log("Invalid username:", username);
+                return res.status(401).send('Invalid credentials');
+            }
 
-        // Check if password is hashed in database
-        console.log('Stored Hashed Password:', user.password);
-        console.log('Entered Plain Password:', password);
+            const user = results[0];
 
-        // Compare the hashed password with the entered password
-        const isMatch = await bcrypt.compare(password, user.password);
+            console.log("Stored Hashed Password:", user.password);
+            console.log("Entered Plain Password:", password);
 
-        if (!isMatch) {
-            console.log('Password does not match');
-            return res.status(401).send('Invalid credentials');
-        }
+            // Compare the hashed password with the entered password
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (err) {
+                    console.error("bcrypt error:", err);
+                    return res.status(500).send('Server error');
+                }
 
-        console.log('Login successful');
-        res.redirect('/dashboard'); // Redirect user to a dashboard or home page after login
-    });
+                if (!isMatch) {
+                    console.log("Password does not match");
+                    return res.status(401).send('Invalid credentials');
+                }
+
+                console.log("Login successful for:", username);
+
+                res.redirect('/dashboard'); // Redirect user to dashboard after login
+            });
+        });
+    } catch (error) {
+        console.error("Unexpected error:", error);
+        res.status(500).send('Server error');
+    }
 });
-
 
 // OTP Validation Route
 app.post('/validate', (req, res) => {
