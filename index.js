@@ -101,9 +101,14 @@ app.get('/', (req, res) => {
     res.redirect('/register');
 });
 
-// register Page
+// register page
 app.get('/register', (req, res) => {
     res.render('register'); // Loads register.ejs
+});
+
+// login page
+app.get('/login', (req, res) => {
+    res.render('login'); 
 });
 
 // Handle login
