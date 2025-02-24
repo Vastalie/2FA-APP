@@ -186,7 +186,7 @@ app.get('/qr-setup', (req, res) => {
 
         const secret = results[0].secret;
         // Create otpauth URL
-        const otpauth = otplib.authenticator.keyuri(username, 'SecureNotesApp', secret);
+        const otpauth = otplib.authenticator.keyuri(username, '2FA-APP', secret);
 
         // Generate QR code as data URL
         qrcode.toDataURL(otpauth, (err, qrCodeUrl) => {
