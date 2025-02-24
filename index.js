@@ -202,7 +202,9 @@ app.get('/qr-setup', (req, res) => {
 
 // OTP validation route
 app.post('/validate', (req, res) => {
-    const { username, otp } = req.body;
+    const username = req.session.username;
+    const otp = req.body.otp;
+
 
     db.query('SELECT secret FROM users WHERE username = ?', [username], (err, results) => {
         if (err) {
