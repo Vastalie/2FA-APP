@@ -8,6 +8,7 @@ const path = require('path');
 const app = express();
 const PORT = 8000;
 
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('views'));
