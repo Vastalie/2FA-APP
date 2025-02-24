@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script>
+        function validateForm() {
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+
+            if (username.length < 8) {
+                alert("Username must be at least 8 characters long.");
+                return false;
+            }
+
+            if (password.length < 8) {
+                alert("Password must be at least 8 characters long.");
+                return false;
+            }
+
+            return true; // Allow form submission
+        }
+    </script>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="/register" method="POST" onsubmit="return validateForm()">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="/login">Login</a></p>
+</body>
+</html>

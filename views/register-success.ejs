@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful</title>
+    <script>         
+    // Automatically redirect the user to the login page after 5 seconds
+        setTimeout(() => {
+            window.location.href = "/login"; // Redirect to login page after 5 seconds
+        }, 5000);
+    </script>
+</head>
+<body>
+    <h2>Registration Successful!</h2>
+    <p>Your account has been created. You will be redirected to the login page in 5 seconds...</p>
+            <!-- If the automatic redirect does not work, provide a manual link -->
+    <p>If the redirection does not work, <a href="/login">click here</a>.</p>
+</body>
+</html>
