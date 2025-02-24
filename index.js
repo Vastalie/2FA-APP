@@ -45,7 +45,7 @@ function generateQRCode(otpauth, callback) {
 }
 
 app.get('/', (req, res) => {
-  res.render('register'); // This loads register.ejs as the home page
+  res.render('register'); // code loads register.ejs as the home page
 });
 
 // register page
