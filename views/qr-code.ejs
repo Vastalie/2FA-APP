@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup 2FA</title>
+</head>
+<body>
+    <h1>Scan this QR Code to Enable 2FA</h1>
+    
+    <% if (qrCodeUrl) { %>
+        <img src="<%= qrCodeUrl %>" alt="QR Code">
+        <p>Use Google Authenticator, Authy, or another 2FA app to scan the QR code.</p>
+    <% } else { %>
+        <p>Error generating QR Code. Please try again.</p>
+    <% } %>
+
+    <h2>Enter the OTP Code</h2>
+    <form action="/validate" method="post">
+        <label for="otp">One-Time Password (OTP):</label>
+        <input type="text" id="otp" name="otp" required>
+        <button type="submit">Verify OTP</button>
+    </form>
+</body>
+</html>
