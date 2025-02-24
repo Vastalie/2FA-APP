@@ -72,11 +72,6 @@ app.get('/register', (req, res) => {
     res.render('register'); // Loads register.ejs
 });
 
-// Register page
-app.get('/register', (req, res) => {
-    res.render('register'); 
-});
-
 // Handle registration
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
@@ -156,6 +151,39 @@ app.post('/login', (req, res) => {
     });
 });
 
+app.get('/qr-setup', (req, res) => {
+    if (!req.session.username) {
+        return res.redirect('/login'); // Ensure only logged-in users access QR setup
+    }
+
+    const username = req.session.username;
+
+    // Retrieve the user's secret key from the database
+    db.query('SELECT secret FROM users WHERE username = ?', [username], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Database error');
+        }
+
+        if (results.length === 0 || !results[0].secret) {
+            return res.status(400).send('No OTP secret found. Register first.');
+        }
+
+        const secret = results[0].secret;
+        const otpauth = otplib.authenticator.keyuri(username, 'SecureNotesApp', secret);
+
+        // Generate QR code as a data URL
+        qrcode.toDataURL(otpauth, (err, qrCodeUrl) => {
+            if (err) {
+                console.error('QR Code generation error:', err);
+                return res.status(500).send('Error generating QR code');
+            }
+
+            // Render the QR code page with the QR code image
+            res.render('qr-code', { qrCodeUrl });
+        });
+    });
+});
 
 
 // OTP Validation Route
