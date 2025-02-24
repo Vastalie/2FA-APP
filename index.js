@@ -15,6 +15,7 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views'); // Specify the views directory
 
 // Middleware
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
