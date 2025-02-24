@@ -124,51 +124,49 @@ app.get('/login', (req, res) => {
 
 
 // Handle login
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
+    console.log("Received Login Request:", req.body); // ✅ Debug: Print received form data
+
+    if (!req.body || !req.body.username || !req.body.password) {
+        console.log("Error: req.body is empty or missing fields");
+        return res.status(400).send('Error: Username and password are required.');
+    }
+
     const { username, password } = req.body;
 
-    try {
-        // Query the database using a Promise-based approach
-        db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+    db.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).send('Database error');
+        }
+
+        console.log("DB Query Results:", results); // ✅ Debug: Check database output
+
+        if (results.length === 0) {
+            console.log("Invalid username:", username);
+            return res.status(401).send('Invalid credentials');
+        }
+
+        const user = results[0];
+
+        console.log("Stored Hashed Password:", user.password);
+        console.log("Entered Plain Password:", password);
+
+        bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
-                console.error("Database error:", err);
-                return res.status(500).send('Database error');
+                console.error("bcrypt error:", err);
+                return res.status(500).send('Server error');
             }
 
-            // Debug: Print database results
-            console.log("DB Query Results:", results);
-
-            if (results.length === 0) {
-                console.log("Invalid username:", username);
+            if (!isMatch) {
+                console.log("Password does not match");
                 return res.status(401).send('Invalid credentials');
             }
 
-            const user = results[0];
-
-            console.log("Stored Hashed Password:", user.password);
-            console.log("Entered Plain Password:", password);
-
-            // Compare the hashed password with the entered password
-            bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (err) {
-                    console.error("bcrypt error:", err);
-                    return res.status(500).send('Server error');
-                }
-
-                if (!isMatch) {
-                    console.log("Password does not match");
-                    return res.status(401).send('Invalid credentials');
-                }
-
-                console.log("Login successful for:", username);
-
-                res.redirect('/dashboard'); // Redirect user to dashboard after login
-            });
+            console.log("Login successful for:", username);
+            res.redirect('/dashboard'); // Redirect user to dashboard after login
         });
-    } catch (error) {
-        console.error("Unexpected error:", error);
-        res.status(500).send('Server error');
-    }
+    });
 });
 
 // OTP Validation Route
