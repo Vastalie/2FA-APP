@@ -91,23 +91,19 @@ app.post('/register', async (req, res) => {
     });
 });
 
-// Register success page
+// register success page
 app.get('/register-success', (req, res) => {
     res.render('register-success');
 });
 
-// Login page
+// register is the default page
 app.get('/', (req, res) => {
-    res.send(`
-        <h1>Login</h1>
-        <form action="/login" method="POST">
-            <label>Username:</label>
-            <input type="text" name="username" required><br>
-            <label>Password:</label>
-            <input type="password" name="password" required><br>
-            <button type="submit">Login</button>
-        </form>
-    `);
+    res.redirect('/register');
+});
+
+// register Page
+app.get('/register', (req, res) => {
+    res.render('register'); // Loads register.ejs
 });
 
 // Handle login
