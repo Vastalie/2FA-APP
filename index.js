@@ -56,41 +56,6 @@ function generateQRCode(otpauth, callback) {
     });
 }
 
-// Register page
-app.get('/register', (req, res) => {
-    res.render('register'); 
-});
-
-// Handle registration
-app.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
-
-    if (username.length < 8) {
-        return res.send('Error: Username must be at least 8 characters long.');
-    }
-    if (password.length < 8) {
-        return res.send('Error: Password must be at least 8 characters long.');
-    }
-
-    // Check if user already exists
-    db.query('SELECT email FROM users WHERE email = ?', [email], async (err, results) => {
-        if (err) return res.status(500).send('Database error');
-        if (results.length > 0) {
-            return res.send('Email already registered. Try another one.');
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert user into database
-        db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-            [username, email, hashedPassword], (err) => {
-                if (err) return res.status(500).send('Database error');
-                res.redirect('/register-success'); // redirect to avoid resubmission
-            });
-    });
-});
-
 // register success page
 app.get('/register-success', (req, res) => {
     res.render('register-success');
@@ -104,6 +69,35 @@ app.get('/', (req, res) => {
 // register page
 app.get('/register', (req, res) => {
     res.render('register'); // Loads register.ejs
+});
+
+// Register page
+app.get('/register', (req, res) => {
+    res.render('register'); 
+});
+
+// Handle registration
+app.post('/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    // Check if username already exists
+    db.query('SELECT username FROM users WHERE username = ?', [username], async (err, results) => {
+        if (err) throw err;
+
+        if (results.length > 0) {
+            return res.send('Error: Username already taken. Try another one.');
+        }
+
+        // Hash the password before storing it
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert user into the database (allowing duplicate emails)
+        db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+            [username, email, hashedPassword], (err, result) => {
+                if (err) throw err;
+                res.redirect('/login'); // Redirect to login after successful registration
+            });
+    });
 });
 
 // login page
