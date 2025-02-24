@@ -80,22 +80,33 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
-    // Check if username already exists
-    db.query('SELECT username FROM users WHERE username = ?', [username], async (err, results) => {
-        if (err) throw err;
+    if (username.length < 8 || password.length < 8) {
+        return res.send('Error: Username and password must be at least 8 characters long.');
+    }
 
-        if (results.length > 0) {
-            return res.send('Error: Username already taken. Try another one.');
+    // Check if email already exists before inserting
+    db.query('SELECT email FROM users WHERE email = ?', [email], async (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
         }
 
-        // Hash the password before storing it
+        if (results.length > 0) {
+            return res.status(400).send('Error: This email is already registered. Try another one.');
+        }
+
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user into the database (allowing duplicate emails)
+        // Insert new user into database
         db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
             [username, email, hashedPassword], (err, result) => {
-                if (err) throw err;
-                res.redirect('/login'); // Redirect to login after successful registration
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Database error while inserting user.');
+                }
+
+                res.redirect('/register-success'); // Redirect to success page
             });
     });
 });
