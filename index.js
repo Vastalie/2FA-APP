@@ -86,7 +86,7 @@ app.post('/register', async (req, res) => {
         db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
             [username, email, hashedPassword], (err) => {
                 if (err) return res.status(500).send('Database error');
-                res.redirect('/register-success'); // ✅ Fix: Redirect to avoid resubmission
+                res.redirect('/register-success'); // redirect to avoid resubmission
             });
     });
 });
@@ -130,7 +130,7 @@ app.post('/login', (req, res) => {
 
         // Generate a new TOTP secret for every login
         const newSecret = otplib.authenticator.generateSecret();
-        req.session.otpSecret = newSecret; // ✅ Fix: Store secret in session
+        req.session.otpSecret = newSecret; // store secret in session
 
         // Generate a unique otpauth URL
         const otpauth = otplib.authenticator.keyuri(username, 'My2FAApp', newSecret);
