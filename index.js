@@ -44,6 +44,10 @@ function generateQRCode(otpauth, callback) {
   });
 }
 
+app.get('/', (req, res) => {
+  res.render('register'); // This loads register.ejs as the home page
+});
+
 // register page
 app.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
