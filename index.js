@@ -151,10 +151,11 @@ app.post('/login', (req, res) => {
                 return res.status(401).send('Invalid credentials');
             }
 
-            res.send('Login successful'); // Placeholder response for now
+            res.redirect('/qr-setup'); // Redirect user to the QR code setup page
         });
     });
 });
+
 
 
 // OTP Validation Route
