@@ -220,7 +220,9 @@ app.post('/validate', (req, res) => {
         }
 
         // Set OTP expiry time to 30 seconds
-         otplib.authenticator.options = { step: 30 };
+         const totp = otplib.authenticator.clone();
+         totp.options = { step: 30 };
+
 
         // Check OTP
         const isValid = otplib.authenticator.check(otp, secret);
