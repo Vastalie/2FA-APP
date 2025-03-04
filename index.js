@@ -219,6 +219,9 @@ app.post('/validate', (req, res) => {
             return res.status(401).send('No OTP secret found. Generate one first.');
         }
 
+        // Set OTP expiry time to 30 seconds
+         otplib.authenticator.options = { step: 30 };
+
         // Check OTP
         const isValid = otplib.authenticator.check(otp, secret);
         if (isValid) {
