@@ -225,7 +225,7 @@ app.post('/validate', (req, res) => {
 
 
         // Check OTP
-        const isValid = otplib.authenticator.check(otp, secret);
+        const isValid = totp.check(otp, secret);
         if (isValid) {
             res.send('<h1>2FA Authentication Successful</h1>');
         } else {
