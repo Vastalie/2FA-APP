@@ -223,7 +223,6 @@ app.post('/validate', (req, res) => {
          const totp = otplib.authenticator.clone();
          totp.options = { step: 30 };
 
-
         // Check OTP
         const isValid = totp.check(otp, secret);
         if (isValid) {
