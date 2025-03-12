@@ -132,38 +132,36 @@ app.get('/login', (req, res) => {
 });
 
 // Handle login
-app.post('/login', (req, res) => {
-    if (!req.body || !req.body.username || !req.body.password) {
-        return res.status(400).send('Error: Username and password are required.');
-    }
+const userAgent = require('user-agent'); // Install this package using: npm install user-agent
 
+app.post('/login', (req, res) => {
     const { username, password } = req.body;
+    const deviceInfo = req.headers['user-agent']; // Gets the user's device info
 
     db.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
-        if (err) {
-            return res.status(500).send('Database error');
-        }
-
-        if (results.length === 0) {
-            return res.status(401).send('Invalid credentials');
-        }
+        if (err) return res.status(500).send('Database error');
+        if (results.length === 0) return res.status(401).send('Invalid credentials');
 
         const user = results[0];
+
         bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) {
-                return res.status(500).send('Server error');
-            }
+            if (err) return res.status(500).send('Server error');
+            if (!isMatch) return res.status(401).send('Invalid credentials');
 
-            if (!isMatch) {
-                return res.status(401).send('Invalid credentials');
-            }
-
-            // Save username in session
+            // Store username in session
             req.session.username = user.username;
-            res.redirect('/qr-setup');
+
+            // Update last login timestamp and device info
+            db.query(
+                'UPDATE users SET last_login = NOW(), last_device = ? WHERE username = ?',
+                [deviceInfo, username]
+            );
+
+            res.redirect('/qr-setup'); // Proceed to 2FA
         });
     });
 });
+
 
 // QR setup page
 app.get('/qr-setup', (req, res) => {
