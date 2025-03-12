@@ -162,7 +162,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-
 // QR setup page
 app.get('/qr-setup', (req, res) => {
     if (!req.session.username) {
@@ -203,33 +202,32 @@ app.post('/validate', (req, res) => {
     const username = req.session.username;
     const otp = req.body.otp;
 
-
     db.query('SELECT secret FROM users WHERE username = ?', [username], (err, results) => {
-        if (err) {
-            return res.status(500).send('Server error');
-        }
-        if (results.length === 0) {
-            return res.status(401).send('User not found');
-        }
+        if (err) return res.status(500).send('Server error');
+        if (results.length === 0) return res.status(401).send('User not found');
 
         const secret = results[0].secret;
-        if (!secret) {
-            return res.status(401).send('No OTP secret found. Generate one first.');
-        }
+        if (!secret) return res.status(401).send('No OTP secret found. Generate one first.');
 
         // Set OTP expiry time to 30 seconds
-         const totp = otplib.authenticator.clone();
-         totp.options = { step: 30 };
+        const totp = otplib.authenticator.clone();
+        totp.options = { step: 30 };
 
         // Check OTP
         const isValid = totp.check(otp, secret);
         if (isValid) {
-            res.send('<h1>2FA Authentication Successful</h1>');
+            req.session.authenticated = true; // Store authentication status in session
+
+            // Update last 2FA verification time
+            db.query('UPDATE users SET last_2fa = NOW() WHERE username = ?', [username]);
+
+            res.redirect('/dashboard'); // Redirect to dashboard after successful 2FA
         } else {
             res.status(401).send('<h1>Invalid OTP</h1>');
         }
     });
 });
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
