@@ -126,6 +126,14 @@ app.post('/register', (req, res) => {
     });
 });
 
+app.get('/users-registered', (req, res) => {
+    db.query('SELECT username, email, registered_at FROM users', (err, results) => {
+        if (err) return res.status(500).send('Database error while fetching users.');
+
+        res.render('users-registered', { users: results });
+    });
+});
+
 // Login page
 app.get('/login', (req, res) => {
     res.render('login');

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Registered</title>
+</head>
+<body>
+    <h2>List of Registered Users</h2>
+    
+    <table border="1">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Registered At</th>
+        </tr>
+        <% users.forEach(user => { %>
+            <tr>
+                <td><%= user.username %></td>
+                <td><%= user.email %></td>
+                <td><%= user.registered_at %></td>
+            </tr>
+        <% }); %>
+    </table>
+
+    <br>
+    <a href="/register"><button>Back to Register</button></a>
+</body>
+</html>
