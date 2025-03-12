@@ -8,6 +8,9 @@
 <body>
     <h2>Welcome, <%= user.username %>!</h2>
 
+    <p style="color: green; font-weight: bold;">✅ You have successfully completed Two-Factor Authentication.</p>
+
+
     <h3>Your Account Activity</h3>
     <p><strong>Registered At:</strong> <%= user.registered_at %></p>
     <p><strong>Last Login:</strong> <%= user.last_login ? user.last_login : "Not recorded" %></p>
