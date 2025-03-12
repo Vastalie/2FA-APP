@@ -108,7 +108,7 @@ app.post('/register', (req, res) => {
                     // Generate a 2FA secret for this new user
                     const newSecret = otplib.authenticator.generateSecret();
 
-                    // Save it in the users table
+                    // Updates the newly registered in users table
                     db.query(
                         'UPDATE users SET secret = ? WHERE id = ?',
                         [newSecret, result.insertId],
