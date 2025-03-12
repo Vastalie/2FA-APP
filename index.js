@@ -233,6 +233,13 @@ app.post('/validate', (req, res) => {
     });
 });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) return res.status(500).send('Logout failed');
+        res.redirect('/login');
+    });
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
