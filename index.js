@@ -227,7 +227,23 @@ app.post('/validate', (req, res) => {
         }
     });
 });
+app.get('/dashboard', (req, res) => {
+    if (!req.session.username || !req.session.authenticated) {
+        return res.redirect('/login');
+    }
 
+    const username = req.session.username;
+
+    db.query('SELECT username, registered_at, last_login, last_2fa, last_device FROM users WHERE username = ?', 
+    [username], (err, results) => {
+        if (err) return res.status(500).send('Database error');
+        if (results.length === 0) return res.status(404).send('User not found');
+
+        const userData = results[0];
+
+        res.render('dashboard', { user: userData });
+    });
+});
 
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
