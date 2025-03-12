@@ -1,17 +1,21 @@
-app.get('/dashboard', (req, res) => {
-    if (!req.session.username || !req.session.authenticated) {
-        return res.redirect('/login');
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, <%= user.username %>!</h2>
 
-    const username = req.session.username;
+    <h3>Your Account Activity</h3>
+    <p><strong>Registered At:</strong> <%= user.registered_at %></p>
+    <p><strong>Last Login:</strong> <%= user.last_login ? user.last_login : "Not recorded" %></p>
+    <p><strong>Last 2FA Verification:</strong> <%= user.last_2fa ? user.last_2fa : "Not recorded" %></p>
+    <p><strong>Device Used:</strong> <%= user.last_device ? user.last_device : "Unknown" %></p>
 
-    db.query('SELECT username, registered_at, last_login, last_2fa, last_device FROM users WHERE username = ?', 
-    [username], (err, results) => {
-        if (err) return res.status(500).send('Database error');
-        if (results.length === 0) return res.status(404).send('User not found');
-
-        const userData = results[0];
-
-        res.render('dashboard', { user: userData });
-    });
-});
+    <a href="/logout">
+        <button>Logout</button>
+    </a>
+</body>
+</html>
