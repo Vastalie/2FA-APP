@@ -127,7 +127,8 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/users-registered', (req, res) => {
-    db.query('SELECT username, email, registered_at FROM users', (err, results) => {
+    db.query('SELECT username, email, DATE_FORMAT(registered_at, "%W, %M %e %Y %H:%i:%s") AS formatted_date FROM users ORDER BY registered_at DESC', 
+    (err, results) => {
         if (err) return res.status(500).send('Database error while fetching users.');
 
         res.render('users-registered', { users: results });
