@@ -12,11 +12,25 @@
         <input type="text" name="username" required><br><br>
 
         <label for="password">Password:</label>
-        <input type="password" name="password" required><br><br>
+        <input type="password" id="password" name="password" required>
+        <button type="button" id="togglePassword">Show</button><br><br>
 
         <button type="submit">Login</button>
     </form>
 
     <p>Don't have an account? <a href="/register">Register here</a></p>
+
+    <script>
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const passwordInput = document.getElementById("password");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                this.innerText = "Hide"; // Change button text
+            } else {
+                passwordInput.type = "password";
+                this.innerText = "Show";
+            }
+        });
+    </script>
 </body>
 </html>
