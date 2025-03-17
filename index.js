@@ -7,6 +7,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 
+const app = require('../index'); 
 const app = express();
 const PORT = 8000;
 
