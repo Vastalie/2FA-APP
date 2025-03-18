@@ -264,10 +264,11 @@ app.get('/logout', (req, res) => {
 // Start the server
 
 // ✅ Start server only if NOT in test mode
-let server;
 if (process.env.NODE_ENV !== 'test') {
     server = app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
+        if (process.env.NODE_ENV !== 'test') {
+            console.log(`Server running at http://localhost:${PORT}`);
+        }
     });
-
-}                                     
+}
+                                   
