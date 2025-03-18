@@ -37,7 +37,7 @@ const db = mysql.createConnection({
 db.connect((err) => {
     if (err) {
         console.error('Database connection failed:', err);
-        process.exit(1);
+        throw new Error('Database connection error'); // ✅ Jest can handle this properly
     }
     console.log('Connected to MySQL database.');
 });

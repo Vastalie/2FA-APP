@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index'); // Import your Express app
+const server = require('../index'); // Import your Express app
 
 describe('Brute Force Attack Test', () => {
     test('Brute force login attempts should be blocked', async () => {
