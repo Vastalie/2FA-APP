@@ -283,5 +283,5 @@ if (process.env.NODE_ENV !== 'test') {
     server = app; // assign app directly in test mode
 }
 
-module.exports = server; //exports the correct instance
+module.exports = { app, server }; //exports the correct instance
                              

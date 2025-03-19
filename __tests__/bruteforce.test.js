@@ -1,5 +1,5 @@
 const request = require('supertest');
-const server = require('../index'); // Import your Express app
+const { app, server } = require('../index'); // Import your Express app
 
 describe('Brute Force Attack Test', () => {
     test('Brute force login attempts should be blocked', async () => {
@@ -23,7 +23,11 @@ describe('Brute Force Attack Test', () => {
     });
 
     afterAll((done) => {
-        server.close(done); // Ensure the server closes properly after the test
+        if (server && typeof server.close === 'function') {
+            server.close(done); // Ensure the server closes properly after the test
+        } else {
+            done();
+        }
     });
 });
 
