@@ -183,7 +183,6 @@ app.post('/login', loginLimiter, (req, res) => { // ✅ Apply rate limiter befor
     });
 });
 
-
 // QR setup page
 app.get('/qr-setup', (req, res) => {
     if (!req.session.username) {
