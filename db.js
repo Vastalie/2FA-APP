@@ -4,9 +4,9 @@ require('dotenv').config(); // Load environment variables
 // Create a MySQL connection pool
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || '2fa_db',
+    user: process.env.DB_USER || 'admin',
+    password: process.env.DB_PASSWORD || 'Shaina071199',
+    database: process.env.DB_NAME || 'twofa',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
