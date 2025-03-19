@@ -27,22 +27,23 @@ describe('Brute Force Attack Test', () => {
 // Ensure proper cleanup after all tests finish
 afterAll(async () => {
     if (server && typeof server.close === 'function') {
-        await new Promise((resolve) => {
-            server.close(() => {
-                console.log("Server closed.");
-                resolve();
-            });
-        });
+        await new Promise((resolve) => server.close(resolve));
+        console.log("Server closed.");
     }
 
     if (db && db.end) {
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
             db.end((err) => {
-                if (err) console.error("Error closing DB connection:", err);
-                else console.log("DB connection closed.");
-                resolve();
+                if (err) {
+                    console.error("Error closing DB connection:", err);
+                    reject(err);
+                } else {
+                    console.log("DB connection closed.");
+                    resolve();
+                }
             });
         });
     }
 });
+
 
