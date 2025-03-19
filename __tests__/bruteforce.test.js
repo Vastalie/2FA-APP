@@ -22,29 +22,27 @@ describe('Brute Force Attack Test', () => {
         expect(response.status).toBe(429);
         expect(response.text).toContain('Too many login attempts, please try again later');
     });
+});
 
-  // Ensure proper cleanup after all tests finish
-afterAll((done) => {
+// Ensure proper cleanup after all tests finish
+afterAll(async () => {
     if (server && typeof server.close === 'function') {
-        server.close(() => {
-            console.log("Server closed.");
-            checkIfDone();
+        await new Promise((resolve) => {
+            server.close(() => {
+                console.log("Server closed.");
+                resolve();
+            });
         });
-    } else {
-        checkIfDone();
     }
 
     if (db && db.end) {
-        db.end((err) => {
-            if (err) console.error("Error closing DB connection:", err);
-            else console.log("DB connection closed.");
-            checkIfDone();
+        await new Promise((resolve) => {
+            db.end((err) => {
+                if (err) console.error("Error closing DB connection:", err);
+                else console.log("DB connection closed.");
+                resolve();
+            });
         });
-    } else {
-        checkIfDone();
-    }
-
-    function checkIfDone() {
-        if (!server && !db) done(); // Ensure Jest knows cleanup is done
     }
 });
+
