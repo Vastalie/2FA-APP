@@ -136,14 +136,26 @@ app.get('/users-registered', (req, res) => {
 });
 
 // Login page
+const rateLimit = require('express-rate-limit');
+
+// Limit login attempts: Max 5 per 15 minutes
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login attempts per window
+    message: 'Too many login attempts, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Login page
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// Handle login
-const userAgent = require('user-agent'); // Install this package using: npm install user-agent
+// Handle login with rate limiter
+const userAgent = require('user-agent'); // Ensure this package is installed
 
-app.post('/login', (req, res) => {
+app.post('/login', loginLimiter, (req, res) => { // ✅ Apply rate limiter before authentication
     const { username, password } = req.body;
     const deviceInfo = req.headers['user-agent']; // Gets the user's device info
 
@@ -170,6 +182,7 @@ app.post('/login', (req, res) => {
         });
     });
 });
+
 
 // QR setup page
 app.get('/qr-setup', (req, res) => {
