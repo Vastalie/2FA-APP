@@ -42,7 +42,7 @@ db.connect((err) => {
     console.log('Connected to MySQL database.');
 });
 
-// Function to generate QR Code file (not always necessary if you use data URLs)
+// Function to generate QR Code file
 function generateQRCode(otpauth, callback) {
     const qrFilePath = path.join(__dirname, 'public', `qr_${Date.now()}.png`);
     qrcode.toFile(qrFilePath, otpauth, (err) => {
@@ -155,7 +155,7 @@ app.get('/login', (req, res) => {
 // Handle login with rate limiter
 const userAgent = require('user-agent'); // Ensure this package is installed
 
-app.post('/login', loginLimiter, (req, res) => { // ✅ Apply rate limiter before authentication
+app.post('/login', loginLimiter, (req, res) => { // Apply rate limiter before authentication
     const { username, password } = req.body;
     const deviceInfo = req.headers['user-agent']; // Gets the user's device info
 
